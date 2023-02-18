@@ -3,6 +3,4 @@ Using geolocalization data from urban places of interest, LisNav is a tool for c
 
 Project currently being developed. Public release in June 2023. Visit 3FINERY's [LisNav](https://www.3finery.com/LisNav) project website for further details. 
 
-
-
 ![alt text](https://www.3finery.com/images/LisNav-Banner.jpg)
