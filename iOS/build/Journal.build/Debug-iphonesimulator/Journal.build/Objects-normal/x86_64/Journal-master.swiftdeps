@@ -1,0 +1,10 @@
+version: "Apple Swift version 5.7.2 (swiftlang-5.7.2.135.5 clang-1400.0.29.51)"
+options: "967b7655e45b6e2a920b52e6b17250e2d07a1b7ec3ae4e0231bd77ad32c2dc91"
+build_start_time: [1677675774, 423372030]
+build_end_time: [1677675781, 398236036]
+inputs:
+  "/Users/Llogari/Downloads/Journal materials/Journal finished/Journal/AppDelegate.swift": [1533155518, 0]
+  "/Users/Llogari/Downloads/Journal materials/Journal finished/Journal/Location.swift": [1533148861, 0]
+  "/Users/Llogari/Downloads/Journal materials/Journal finished/Journal/LocationsStorage.swift": [1533313688, 0]
+  "/Users/Llogari/Downloads/Journal materials/Journal finished/Journal/MapViewController.swift": [1533148861, 0]
+  "/Users/Llogari/Downloads/Journal materials/Journal finished/Journal/PlacesTableViewController.swift": [1533148861, 0]
