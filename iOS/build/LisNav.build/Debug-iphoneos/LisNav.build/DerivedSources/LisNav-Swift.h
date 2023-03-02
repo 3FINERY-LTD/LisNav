@@ -233,6 +233,8 @@ using UInt = size_t;
 @import CoreFoundation;
 @import CoreLocation;
 @import Foundation;
+@import MapKit;
+@import ObjectiveC;
 @import UIKit;
 #endif
 
@@ -315,6 +317,16 @@ SWIFT_CLASS("_TtC6LisNav25PlacesTableViewController")
 - (nonnull instancetype)initWithStyle:(UITableViewStyle)style OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithNibName:(NSString * _Nullable)nibNameOrNil bundle:(NSBundle * _Nullable)nibBundleOrNil OBJC_DESIGNATED_INITIALIZER;
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)coder OBJC_DESIGNATED_INITIALIZER;
+@end
+
+
+SWIFT_CLASS("_TtC6LisNav7Station")
+@interface Station : NSObject <MKAnnotation>
+@property (nonatomic, copy) NSString * _Nullable title;
+@property (nonatomic, copy) NSString * _Nullable subtitle;
+@property (nonatomic, readonly) CLLocationCoordinate2D coordinate;
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_DEPRECATED_MSG("-init is unavailable");
 @end
 
 #endif

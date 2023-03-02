@@ -16,7 +16,7 @@
 		5DF46426206A942100157A06 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF46425206A942100157A06 /* MapViewController.swift */; };
 		5DF46428206A96E200157A06 /* LocationsStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF46427206A96E200157A06 /* LocationsStorage.swift */; };
 		5DF4642A206A979A00157A06 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF46429206A979A00157A06 /* Location.swift */; };
-		715ED87C29AF8C3500F84313 /* dataset.json in Resources */ = {isa = PBXBuildFile; fileRef = 715ED87B29AF8C3500F84313 /* dataset.json */; };
+		71D87E8729B1014C00461335 /* dataset.plist in Resources */ = {isa = PBXBuildFile; fileRef = 71D87E8629B1014C00461335 /* dataset.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,7 +30,7 @@
 		5DF46425206A942100157A06 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		5DF46427206A96E200157A06 /* LocationsStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationsStorage.swift; sourceTree = "<group>"; };
 		5DF46429206A979A00157A06 /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
-		715ED87B29AF8C3500F84313 /* dataset.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = dataset.json; sourceTree = "<group>"; };
+		71D87E8629B1014C00461335 /* dataset.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = dataset.plist; sourceTree = "<group>"; };
 		D2A5F2001F4A9144005CD714 /* LisNav.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LisNav.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -53,9 +53,9 @@
 				5DAF113720690B0300E625F5 /* LaunchScreen.storyboard */,
 				5DAF113820690B0300E625F5 /* Assets.xcassets */,
 				5DAF113C20690B0300E625F5 /* Info.plist */,
+				71D87E8629B1014C00461335 /* dataset.plist */,
 				5DAF113B20690B0300E625F5 /* AppDelegate.swift */,
 				43D28D97206984890089D719 /* PlacesTableViewController.swift */,
-				715ED87B29AF8C3500F84313 /* dataset.json */,
 				5DF46425206A942100157A06 /* MapViewController.swift */,
 				5DF46429206A979A00157A06 /* Location.swift */,
 				5DF46427206A96E200157A06 /* LocationsStorage.swift */,
@@ -145,9 +145,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				715ED87C29AF8C3500F84313 /* dataset.json in Resources */,
 				5DAF113F20690B0300E625F5 /* Main.storyboard in Resources */,
 				43B4D4B92083C3F700A86D1B /* Route.gpx in Resources */,
+				71D87E8729B1014C00461335 /* dataset.plist in Resources */,
 				5DAF113E20690B0300E625F5 /* Assets.xcassets in Resources */,
 				5DAF113D20690B0300E625F5 /* LaunchScreen.storyboard in Resources */,
 			);
