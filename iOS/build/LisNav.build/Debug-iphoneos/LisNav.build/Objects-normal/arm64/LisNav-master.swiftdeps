@@ -1,10 +1,10 @@
 version: "Apple Swift version 5.7.2 (swiftlang-5.7.2.135.5 clang-1400.0.29.51)"
 options: "9888cefa26cca86db3679c3ef84ed675719843d4ec262c8f8ba581247d43b982"
-build_start_time: [1677773353, 641478061]
-build_end_time: [1677773354, 805254936]
+build_start_time: [1677780607, 89456081]
+build_end_time: [1677780608, 349045038]
 inputs:
   "/Users/Llogari/GitHub/LisNav/iOS/Journal/AppDelegate.swift": [1677677565, 388384342]
   "/Users/Llogari/GitHub/LisNav/iOS/Journal/Location.swift": [1677676390, 32711982]
   "/Users/Llogari/GitHub/LisNav/iOS/Journal/LocationsStorage.swift": [1677676392, 361254215]
-  "/Users/Llogari/GitHub/LisNav/iOS/Journal/MapViewController.swift": [1677773352, 573984622]
+  "/Users/Llogari/GitHub/LisNav/iOS/Journal/MapViewController.swift": [1677780602, 933990001]
   "/Users/Llogari/GitHub/LisNav/iOS/Journal/PlacesTableViewController.swift": [1677676380, 198079586]

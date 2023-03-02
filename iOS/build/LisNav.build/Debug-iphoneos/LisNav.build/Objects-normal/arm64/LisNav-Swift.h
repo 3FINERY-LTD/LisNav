@@ -287,14 +287,16 @@ SWIFT_CLASS("_TtC6LisNav9FakeVisit")
 @end
 
 @class MKMapView;
+@class MKUserLocation;
 @class NSNotification;
 @class NSString;
 @class NSBundle;
 
 SWIFT_CLASS("_TtC6LisNav17MapViewController")
-@interface MapViewController : UIViewController
+@interface MapViewController : UIViewController <MKMapViewDelegate>
 @property (nonatomic, weak) IBOutlet MKMapView * _Null_unspecified mapView;
 - (void)viewDidLoad;
+- (void)mapView:(MKMapView * _Nonnull)mapView didUpdateUserLocation:(MKUserLocation * _Nonnull)userLocation;
 - (IBAction)addItemPressed:(id _Nonnull)sender;
 - (void)newLocationAdded:(NSNotification * _Nonnull)notification;
 - (nonnull instancetype)initWithNibName:(NSString * _Nullable)nibNameOrNil bundle:(NSBundle * _Nullable)nibBundleOrNil OBJC_DESIGNATED_INITIALIZER;

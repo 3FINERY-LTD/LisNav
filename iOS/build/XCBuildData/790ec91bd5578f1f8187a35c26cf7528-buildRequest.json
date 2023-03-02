@@ -1,8 +1,8 @@
 {
   "_buildCommand2" : {
-    "command" : "build",
-    "skipDependencies" : false,
-    "style" : "buildAndRun"
+    "command" : "prepareForIndexing",
+    "enableIndexBuildArena" : false,
+    "targets" : null
   },
   "buildCommand" : "build",
   "configuredTargets" : [
@@ -11,7 +11,7 @@
     }
   ],
   "containerPath" : "/Users/Llogari/GitHub/LisNav/iOS/LisNav.xcodeproj",
-  "continueBuildingAfterErrors" : false,
+  "continueBuildingAfterErrors" : true,
   "enableIndexBuildArena" : false,
   "hideShellScriptEnvironment" : false,
   "parameters" : {
