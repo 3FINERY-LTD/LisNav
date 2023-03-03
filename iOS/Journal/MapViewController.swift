@@ -123,6 +123,36 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     return text
   }
   
+  func calculateOutputChannel(user: CLLocation, annotation: CLLocation, heading: CLLocationDirection?) -> AudioChannelLabel? {
+    var degrees : Double = 0
+    
+    if(heading != nil) {
+      if(annotation.coordinate.latitude > user.coordinate.latitude && annotation.coordinate.longitude > user.coordinate.longitude) {
+        degrees = 45;
+      } else if(annotation.coordinate.latitude > user.coordinate.latitude && annotation.coordinate.longitude < user.coordinate.longitude) {
+        degrees = 135
+      } else if(annotation.coordinate.latitude < user.coordinate.latitude && annotation.coordinate.longitude < user.coordinate.longitude) {
+        degrees = 225
+      } else if(annotation.coordinate.latitude < user.coordinate.latitude && annotation.coordinate.longitude > user.coordinate.longitude) {
+        degrees = 315
+      }
+      
+      degrees += heading ?? 0
+      
+      if(degrees > 360) {
+        degrees -= 360
+      }
+      
+      if(degrees > 0 && degrees <= 180) {
+        return kAudioChannelLabel_Right
+      } else {
+        return kAudioChannelLabel_Left
+      }
+    }
+    
+    return nil
+  }
+  
   func getAddressFromLatLon(userLocation: MKUserLocation) {
     let geocoder : CLGeocoder = CLGeocoder()
     let location = CLLocation(latitude: (userLocation.location?.coordinate.latitude)!, longitude: (userLocation.location?.coordinate.longitude)!)
@@ -172,57 +202,50 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         voiceOverText += calculateUserAngle(user: location, annotation: annotation, heading: userLocation.heading?.magneticHeading)
         voiceOverText += item.subtitle! + ", " + item.title! + ". "
         
+        /*var outputChannel : AudioChannelLabel? = calculateOutputChannel(user: location, annotation: annotation, heading: userLocation.heading?.magneticHeading)
+        
+        if(outputChannel != nil) {
+          synthesizer.outputChannels = initalizeSpeechForChannel(outputChannel: outputChannel!)
+        }*/
+        
         voiceOverIds.append(item.id!)
       }
       
       if(!synthesizer.isSpeaking && !voiceOverIds.containsSameElements(as: idsLastTTS)) {
         let utterance = AVSpeechUtterance(string: voiceOverText)
         utterance.voice = AVSpeechSynthesisVoice(language: "pt-PT")
-        
+
         synthesizer.speak(utterance)
+        
         idsLastTTS = voiceOverIds
       }
       
       isProcessing = false
-      //speechSynthesizer.outputChannels = channels
     }
   }
   
   
-  /*func initalizeSpeechForRightChannel() -> [AVAudioSessionChannelDescription] {
-      let avSession = AVAudioSession.sharedInstance()
-      let route = avSession.currentRoute
-      let outputPorts = route.outputs
+  func initalizeSpeechForChannel(outputChannel: AudioChannelLabel) -> [AVAudioSessionChannelDescription]? {
+    let avSession = AVAudioSession.sharedInstance()
+    let route = avSession.currentRoute
+    let outputPorts = route.outputs
     
     var channels:[AVAudioSessionChannelDescription] = []
     
-      var leftAudioChannel:AVAudioSessionChannelDescription? = nil
-      var leftAudioPortDesc:AVAudioSessionPortDescription? = nil
-      
-    for  outputPort in outputPorts {
-          for channel in outputPort.channels! {
-              leftAudioPortDesc = outputPort
-              //print("Name: \(channel.channelName)")
-              if channel.channelName == "Headphones Left" {
-                  channels.append(channel)
-                  leftAudioChannel = channel
-              }else {
-                 // leftAudioPortDesc?.channels?.removeObject(channel)
-              }
-          }
+    for outputPort in outputPorts {
+      for channel in outputPort.channels! {
+        if channel.channelLabel == outputChannel {
+          channels.append(channel)
+        }
       }
+    }
 
-      if channels.count > 0 {
-          if #available(iOS 10.0, *) {
-              print("Setting Left Channel")
-              
-              print("Checking output channel : \(speechSynthesizer.outputChannels?.count)")
-
-          } else {
-              // Fallback on earlier versions
-              }
-          }
-      }*/
+    if(channels.count > 0) {
+      return channels
+    } else {
+      return nil
+    }
+  }
   
   @IBAction func addItemPressed(_ sender: Any) {
     guard let currentLocation = mapView.userLocation.location else {
