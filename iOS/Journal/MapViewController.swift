@@ -24,6 +24,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
   
   var annotations : [Station] = []
   var idsLastTTS : [Int] = []
+  var isProcessing : Bool = false
   
   let distanceThreshold : Double = 100
   let synthesizer = AVSpeechSynthesizer()
@@ -35,7 +36,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     let url = URL(fileURLWithPath: path)
     let data = try! Data(contentsOf: url)
-
+    
     annotations = getMapAnnotations()
     mapView.addAnnotations(annotations)
     mapView.userTrackingMode = .followWithHeading
@@ -43,7 +44,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     NotificationCenter.default.addObserver(self, selector: #selector(newLocationAdded(_:)), name: .newLocationSaved, object: nil)
   }
-
+  
   func getMapAnnotations() -> [Station] {
     var annotations:Array = [Station]()
     var id = 0
@@ -51,11 +52,11 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     let pListFileURL = Bundle.main.url(forResource: "dataset", withExtension: "plist", subdirectory: "")
     
     if let pListPath = pListFileURL?.path,
-      let pListData = FileManager.default.contents(atPath: pListPath) {
+       let pListData = FileManager.default.contents(atPath: pListPath) {
       
       do {
         let pListArray = try PropertyListSerialization.propertyList(from: pListData, options:PropertyListSerialization.ReadOptions(), format:nil) as! [Dictionary<String, AnyObject>]
-
+        
         for item in pListArray {
           let lat = item["Latitude"] as! Double
           let long = item["Longitude"] as! Double
@@ -64,7 +65,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
           annotation.id = id
           annotation.title = item["Name"] as? String
           annotation.subtitle = item["Type"] as? String
-
+          
           annotations.append(annotation)
           
           id += 1
@@ -80,39 +81,10 @@ class MapViewController: UIViewController, MKMapViewDelegate {
   func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
     let location = CLLocation(latitude: (userLocation.location?.coordinate.latitude)!, longitude: (userLocation.location?.coordinate.longitude)!)
     
-    if(userLocation.heading?.magneticHeading != nil) {
-      var nearbyAnnotations:Array = [Station]()
+    if(!isProcessing) {
+      isProcessing = true
       
-      for item in annotations {
-        let annotation = CLLocation(latitude: item.latitude, longitude: item.longitude)
-        let distance = location.distance(from: annotation)
-        
-        if(distance < distanceThreshold) {
-          nearbyAnnotations.append(item)
-        }
-      }
-      
-      var voiceOverText = ""
-      var voiceOverIds : [Int] = []
-      
-      for item in nearbyAnnotations {
-        let annotation = CLLocation(latitude: item.latitude, longitude: item.longitude)
-        
-        voiceOverText += calculateUserAngle(user: location, annotation: annotation, heading: userLocation.heading?.magneticHeading)
-        voiceOverText += item.subtitle! + ", " + item.title! + ". "
-        
-        voiceOverIds.append(item.id!)
-      }
-      
-      if(!synthesizer.isSpeaking && !voiceOverIds.containsSameElements(as: idsLastTTS)) {
-        let utterance = AVSpeechUtterance(string: voiceOverText)
-        utterance.voice = AVSpeechSynthesisVoice(language: "pt-PT")
-        
-        synthesizer.speak(utterance)
-        idsLastTTS = voiceOverIds
-      }
-      
-      //speechSynthesizer.outputChannels = channels
+      getAddressFromLatLon(userLocation: userLocation)
     }
   }
   
@@ -147,9 +119,75 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         text = "À sua frente, à esquerda, você encontrará "
       }
     }
-
+    
     return text
   }
+  
+  func getAddressFromLatLon(userLocation: MKUserLocation) {
+    let geocoder : CLGeocoder = CLGeocoder()
+    let location = CLLocation(latitude: (userLocation.location?.coordinate.latitude)!, longitude: (userLocation.location?.coordinate.longitude)!)
+    
+    geocoder.reverseGeocodeLocation(location, completionHandler: {(placemarks, error) in
+      if (error != nil) {
+        print("reverse geodcode fail: \(error!.localizedDescription)")
+      }
+      
+      let pm = placemarks as [CLPlacemark]?
+      
+      if pm != nil {
+        if pm!.count > 0 {
+          let pm = placemarks![0]
+
+          self.getAnnotationsFromLatLong(userLocation: userLocation, streetAddress: pm.thoroughfare)
+        }
+      }
+    })
+  }
+  
+  func getAnnotationsFromLatLong(userLocation: MKUserLocation, streetAddress: String?) {
+    let location = CLLocation(latitude: (userLocation.location?.coordinate.latitude)!, longitude: (userLocation.location?.coordinate.longitude)!)
+    
+    if(userLocation.heading?.magneticHeading != nil) {
+      var nearbyAnnotations:Array = [Station]()
+      
+      for item in annotations {
+        let annotation = CLLocation(latitude: item.latitude, longitude: item.longitude)
+        let distance = location.distance(from: annotation)
+        
+        if(distance < distanceThreshold) {
+          nearbyAnnotations.append(item)
+        }
+      }
+      
+      var voiceOverText = ""
+      var voiceOverIds : [Int] = []
+      
+      if(streetAddress != nil) {
+        voiceOverText = "Você está na " + streetAddress! + ". "
+      }
+      
+      for item in nearbyAnnotations {
+        let annotation = CLLocation(latitude: item.latitude, longitude: item.longitude)
+        
+        voiceOverText += calculateUserAngle(user: location, annotation: annotation, heading: userLocation.heading?.magneticHeading)
+        voiceOverText += item.subtitle! + ", " + item.title! + ". "
+        
+        voiceOverIds.append(item.id!)
+      }
+      
+      if(!synthesizer.isSpeaking && !voiceOverIds.containsSameElements(as: idsLastTTS)) {
+        let utterance = AVSpeechUtterance(string: voiceOverText)
+        utterance.voice = AVSpeechSynthesisVoice(language: "pt-PT")
+        
+        synthesizer.speak(utterance)
+        idsLastTTS = voiceOverIds
+      }
+      
+      isProcessing = false
+      //speechSynthesizer.outputChannels = channels
+    }
+  }
+  
   
   /*func initalizeSpeechForRightChannel() -> [AVAudioSessionChannelDescription] {
       let avSession = AVAudioSession.sharedInstance()
