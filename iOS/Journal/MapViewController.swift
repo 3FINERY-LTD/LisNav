@@ -80,55 +80,111 @@ class MapViewController: UIViewController, MKMapViewDelegate {
   func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
     let location = CLLocation(latitude: (userLocation.location?.coordinate.latitude)!, longitude: (userLocation.location?.coordinate.longitude)!)
     
-    var nearbyAnnotations:Array = [Station]()
-    
-    for item in annotations {
-      let annotation = CLLocation(latitude: item.latitude, longitude: item.longitude)
-      let distance = location.distance(from: annotation)
+    if(userLocation.heading?.magneticHeading != nil) {
+      var nearbyAnnotations:Array = [Station]()
       
-      if(distance < distanceThreshold) {
-        nearbyAnnotations.append(item)
+      for item in annotations {
+        let annotation = CLLocation(latitude: item.latitude, longitude: item.longitude)
+        let distance = location.distance(from: annotation)
+        
+        if(distance < distanceThreshold) {
+          nearbyAnnotations.append(item)
+        }
       }
+      
+      var voiceOverText = ""
+      var voiceOverIds : [Int] = []
+      
+      for item in nearbyAnnotations {
+        let annotation = CLLocation(latitude: item.latitude, longitude: item.longitude)
+        
+        voiceOverText += calculateUserAngle(user: location, annotation: annotation, heading: userLocation.heading?.magneticHeading)
+        voiceOverText += item.subtitle! + ", " + item.title! + ". "
+        
+        voiceOverIds.append(item.id!)
+      }
+      
+      if(!synthesizer.isSpeaking && !voiceOverIds.containsSameElements(as: idsLastTTS)) {
+        let utterance = AVSpeechUtterance(string: voiceOverText)
+        utterance.voice = AVSpeechSynthesisVoice(language: "pt-PT")
+        
+        synthesizer.speak(utterance)
+        idsLastTTS = voiceOverIds
+      }
+      
+      //speechSynthesizer.outputChannels = channels
     }
-    
-    var voiceOverText = ""
-    var voiceOverIds : [Int] = []
-    
-    for item in nearbyAnnotations {
-      let annotation = CLLocation(latitude: item.latitude, longitude: item.longitude)
-      
-      voiceOverText += calculateUserAngle(user: location, annotation: annotation)
-      voiceOverText += item.subtitle! + ", " + item.title! + ". "
-      
-      voiceOverIds.append(item.id!)
-    }
-
-    if(!voiceOverIds.containsSameElements(as: idsLastTTS)) {
-      let utterance = AVSpeechUtterance(string: voiceOverText)
-      utterance.voice = AVSpeechSynthesisVoice(language: "pt-PT")
-      
-      synthesizer.speak(utterance)
-      
-      idsLastTTS = voiceOverIds
-    }
-
   }
   
-  func calculateUserAngle(user: CLLocation, annotation: CLLocation) -> String {
-    var text = "";
+  func calculateUserAngle(user: CLLocation, annotation: CLLocation, heading: CLLocationDirection?) -> String {
+    var text : String = ""
+    var degrees : Double = 0
     
-    if(annotation.coordinate.latitude > user.coordinate.latitude && annotation.coordinate.longitude > user.coordinate.longitude) {
-      text = "À sua frente, à direita, você encontrará "
-    } else if(annotation.coordinate.latitude > user.coordinate.latitude && annotation.coordinate.longitude < user.coordinate.longitude) {
-      text = "Atrás de você, à direita, você encontrará "
-    } else if(annotation.coordinate.latitude < user.coordinate.latitude && annotation.coordinate.longitude < user.coordinate.longitude) {
-      text = "Atrás de você, à esquerda, você encontrará "
-    } else if(annotation.coordinate.latitude < user.coordinate.latitude && annotation.coordinate.longitude > user.coordinate.longitude) {
-      text = "À sua frente, à esquerda, você encontrará "
+    if(heading != nil) {
+      if(annotation.coordinate.latitude > user.coordinate.latitude && annotation.coordinate.longitude > user.coordinate.longitude) {
+        degrees = 45;
+      } else if(annotation.coordinate.latitude > user.coordinate.latitude && annotation.coordinate.longitude < user.coordinate.longitude) {
+        degrees = 135
+      } else if(annotation.coordinate.latitude < user.coordinate.latitude && annotation.coordinate.longitude < user.coordinate.longitude) {
+        degrees = 225
+      } else if(annotation.coordinate.latitude < user.coordinate.latitude && annotation.coordinate.longitude > user.coordinate.longitude) {
+        degrees = 315
+      }
+      
+      degrees += heading ?? 0
+      
+      if(degrees > 360) {
+        degrees -= 360
+      }
+      
+      if(degrees > 0 && degrees <= 90) {
+        text = "À sua frente, à direita, você encontrará "
+      } else if(degrees > 90 && degrees <= 180) {
+        text = "Atrás de você, à direita, você encontrará "
+      } else if(degrees > 180 && degrees <= 270) {
+        text = "Atrás de você, à esquerda, você encontrará "
+      } else if(degrees > 270 && degrees <= 360) {
+        text = "À sua frente, à esquerda, você encontrará "
+      }
     }
-    
+
     return text
   }
+  
+  /*func initalizeSpeechForRightChannel() -> [AVAudioSessionChannelDescription] {
+      let avSession = AVAudioSession.sharedInstance()
+      let route = avSession.currentRoute
+      let outputPorts = route.outputs
+    
+    var channels:[AVAudioSessionChannelDescription] = []
+    
+      var leftAudioChannel:AVAudioSessionChannelDescription? = nil
+      var leftAudioPortDesc:AVAudioSessionPortDescription? = nil
+      
+    for  outputPort in outputPorts {
+          for channel in outputPort.channels! {
+              leftAudioPortDesc = outputPort
+              //print("Name: \(channel.channelName)")
+              if channel.channelName == "Headphones Left" {
+                  channels.append(channel)
+                  leftAudioChannel = channel
+              }else {
+                 // leftAudioPortDesc?.channels?.removeObject(channel)
+              }
+          }
+      }
+
+      if channels.count > 0 {
+          if #available(iOS 10.0, *) {
+              print("Setting Left Channel")
+              
+              print("Checking output channel : \(speechSynthesizer.outputChannels?.count)")
+
+          } else {
+              // Fallback on earlier versions
+              }
+          }
+      }*/
   
   @IBAction func addItemPressed(_ sender: Any) {
     guard let currentLocation = mapView.userLocation.location else {
