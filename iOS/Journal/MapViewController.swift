@@ -89,65 +89,54 @@ class MapViewController: UIViewController, MKMapViewDelegate {
   }
   
   func calculateUserAngle(user: CLLocation, annotation: CLLocation, heading: CLLocationDirection?) -> String {
-    var text : String = ""
-    var degrees : Double = 0
+    let deltaL = annotation.coordinate.longitude.toRadians - user.coordinate.longitude.toRadians
+    let thetaB = annotation.coordinate.latitude.toRadians
+    let thetaA = user.coordinate.latitude.toRadians
     
-    if(heading != nil) {
-      if(annotation.coordinate.latitude > user.coordinate.latitude && annotation.coordinate.longitude > user.coordinate.longitude) {
-        degrees = 45;
-      } else if(annotation.coordinate.latitude > user.coordinate.latitude && annotation.coordinate.longitude < user.coordinate.longitude) {
-        degrees = 135
-      } else if(annotation.coordinate.latitude < user.coordinate.latitude && annotation.coordinate.longitude < user.coordinate.longitude) {
-        degrees = 225
-      } else if(annotation.coordinate.latitude < user.coordinate.latitude && annotation.coordinate.longitude > user.coordinate.longitude) {
-        degrees = 315
-      }
+    let x = cos(thetaB) * sin(deltaL)
+    let y = cos(thetaA) * sin(thetaB) - sin(thetaA) * cos(thetaB) * cos(deltaL)
+    
+    let bearing = atan2(x,y)
+    let bearingInDegrees = bearing.toDegrees
+
+    let bearingFromMe = bearingInDegrees - (heading ?? 0)
+    
+    var text : String = ""
+    var degrees = 360 + bearingFromMe
       
-      degrees += heading ?? 0
-      
-      if(degrees > 360) {
-        degrees -= 360
-      }
-      
-      if(degrees > 0 && degrees <= 90) {
-        text = "À sua frente, à direita, você encontrará "
-      } else if(degrees > 90 && degrees <= 180) {
-        text = "Atrás de você, à direita, você encontrará "
-      } else if(degrees > 180 && degrees <= 270) {
-        text = "Atrás de você, à esquerda, você encontrará "
-      } else if(degrees > 270 && degrees <= 360) {
-        text = "À sua frente, à esquerda, você encontrará "
-      }
+    if(degrees > 0 && degrees <= 90) {
+      text = "À sua frente, à direita, você encontrará "
+    } else if(degrees > 90 && degrees <= 180) {
+      text = "Atrás de você, à direita, você encontrará "
+    } else if(degrees > 180 && degrees <= 270) {
+      text = "Atrás de você, à esquerda, você encontrará "
+    } else if(degrees > 270 && degrees <= 360) {
+      text = "À sua frente, à esquerda, você encontrará "
     }
     
     return text
   }
   
   func calculateOutputChannel(user: CLLocation, annotation: CLLocation, heading: CLLocationDirection?) -> AudioChannelLabel? {
-    var degrees : Double = 0
+    let deltaL = annotation.coordinate.longitude.toRadians - user.coordinate.longitude.toRadians
+    let thetaB = annotation.coordinate.latitude.toRadians
+    let thetaA = user.coordinate.latitude.toRadians
     
-    if(heading != nil) {
-      if(annotation.coordinate.latitude > user.coordinate.latitude && annotation.coordinate.longitude > user.coordinate.longitude) {
-        degrees = 45;
-      } else if(annotation.coordinate.latitude > user.coordinate.latitude && annotation.coordinate.longitude < user.coordinate.longitude) {
-        degrees = 135
-      } else if(annotation.coordinate.latitude < user.coordinate.latitude && annotation.coordinate.longitude < user.coordinate.longitude) {
-        degrees = 225
-      } else if(annotation.coordinate.latitude < user.coordinate.latitude && annotation.coordinate.longitude > user.coordinate.longitude) {
-        degrees = 315
-      }
+    let x = cos(thetaB) * sin(deltaL)
+    let y = cos(thetaA) * sin(thetaB) - sin(thetaA) * cos(thetaB) * cos(deltaL)
+    
+    let bearing = atan2(x,y)
+    let bearingInDegrees = bearing.toDegrees
+
+    let bearingFromMe = bearingInDegrees - (heading ?? 0)
+    
+    var text : String = ""
+    var degrees = 360 + bearingFromMe
       
-      degrees += heading ?? 0
-      
-      if(degrees > 360) {
-        degrees -= 360
-      }
-      
-      if(degrees > 0 && degrees <= 180) {
-        return kAudioChannelLabel_Right
-      } else {
-        return kAudioChannelLabel_Left
-      }
+    if(degrees > 0 && degrees <= 180) {
+      return kAudioChannelLabel_Right
+    } else {
+      return kAudioChannelLabel_Left
     }
     
     return nil
@@ -199,7 +188,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
       for item in nearbyAnnotations {
         let annotation = CLLocation(latitude: item.latitude, longitude: item.longitude)
         
-        voiceOverText += calculateUserAngle(user: location, annotation: annotation, heading: userLocation.heading?.magneticHeading)
+        voiceOverText += calculateUserAngle(user: location, annotation: annotation, heading: userLocation.heading?.trueHeading)
         voiceOverText += item.subtitle! + ", " + item.title! + ". "
         
         /*var outputChannel : AudioChannelLabel? = calculateOutputChannel(user: location, annotation: annotation, heading: userLocation.heading?.magneticHeading)
@@ -274,5 +263,18 @@ class MapViewController: UIViewController, MKMapViewDelegate {
 extension Array where Element: Comparable {
     func containsSameElements(as other: [Element]) -> Bool {
         return self.count == other.count && self.sorted() == other.sorted()
+    }
+}
+
+extension Double {
+    var toRadians : Double {
+        var m = Measurement(value: self, unit: UnitAngle.degrees)
+        m.convert(to: .radians)
+        return m.value
+    }
+    var toDegrees : Double {
+        var m = Measurement(value: self, unit: UnitAngle.radians)
+        m.convert(to: .degrees)
+        return m.value
     }
 }
